@@ -1,0 +1,13 @@
+{
+  "autoload": {
+    "psr-4": {
+      "Models\\": "models/",
+      "Controllers\\": "controllers/",
+      "Views\\": "views/",
+      "Framework\\": "framework/"
+    }
+  },
+  "require": {
+    "vlucas/phpdotenv": "^5.6"
+  }
+}
