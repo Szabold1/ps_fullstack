@@ -39,11 +39,13 @@ class Router
                 exit;
             }
             http_response_code(Response::$INTERNAL_SERVER_ERROR);
+            loadView('error', ['message' => 'Belső kiszolgálóhiba']);
             exit;
         }
 
         // If the route is not found, return an error
         http_response_code(Response::$NOT_FOUND);
+        loadView('error', ['message' => 'A keresett oldal nem található']);
         exit;
     }
 }
