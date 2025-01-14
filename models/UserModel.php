@@ -15,25 +15,31 @@ class UserModel
         $this->db = new Database($config);
     }
 
-    // Get user data from database or file, based on the email of the user
-    public function getUserByEmail(string $email)
+    private function getUserFromFile(string $type, string $value)
     {
-        if (rand(0, 1) === 0) {
-            return $this->db->query("SELECT * FROM users WHERE email = :email", ['email' => $email])->fetch();
-        } else {
-            $filePath = basePath('data/users.json');
+        $filePath = basePath('data/users.json');
 
-            if (file_exists($filePath)) {
-                $fileContent = file_get_contents($filePath);
-                $users = json_decode($fileContent, true) ?? [];
-                foreach ($users as $user) {
-                    if (isset($user['email']) && $user['email'] === $email) {
-                        return (object)$user;
-                    }
+        if (file_exists($filePath)) {
+            $fileContent = file_get_contents($filePath);
+            $users = json_decode($fileContent, true) ?? [];
+            foreach ($users as $user) {
+                if (isset($user[$type]) && $user[$type] === $value) {
+                    return (object)$user;
                 }
             }
+        }
 
-            return null;
+        return null;
+    }
+
+    // Get user data from database or file, based on 'type' and 'value'
+    // e.g. getUser('email', 'asdf@example.com')
+    public function getUser(string $type, string $value)
+    {
+        if (rand(0, 1) === 0) {
+            return $this->db->query("SELECT * FROM users WHERE $type = :$type", [$type => $value])->fetch();
+        } else {
+            return $this->getUserFromFile($type, $value);
         }
     }
 
@@ -54,7 +60,7 @@ class UserModel
     public function create(array $data)
     {
         // check if user email already exists
-        $user = $this->getUserByEmail($data['email']);
+        $user = $this->getUser('email', $data['email']);
         if ($user) {
             http_response_code(Response::$CONFLICT);
             loadView('register', [
@@ -81,7 +87,7 @@ class UserModel
     public function login(array $data)
     {
         // check for email and password
-        $user = $this->getUserByEmail($data['email']);
+        $user = $this->getUser('email', $data['email']);
 
         if (!$user || !password_verify($data['password'], $user->password_hash)) {
             http_response_code(Response::$UNAUTHORIZED);
