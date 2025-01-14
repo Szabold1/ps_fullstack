@@ -24,11 +24,6 @@ class Router
                 "method" => "logout",
                 "auth" => 'user'
             ],
-            "/profile/edit" => [
-                "controller" => UserController::class,
-                "method" => "editProfile",
-                "auth" => 'user'
-            ],
         ],
         "GET" => [
             "/" => [
@@ -56,13 +51,25 @@ class Router
                 "method" => "pageEditProfile",
                 "auth" => 'user'
             ],
-        ]
+        ],
+        "PUT" => [
+            "/profile/edit" => [
+                "controller" => UserController::class,
+                "method" => "editProfile",
+                "auth" => 'user'
+            ],
+        ],
     ];
 
     public static function route()
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        // change $method to the value of the _method parameter if it exists
+        if ($method === 'POST' && isset($_POST['_method'])) {
+            $method = $_POST['_method'];
+        }
 
         $route = Router::$routes[$method][$path] ?? null;
         if ($route) {
