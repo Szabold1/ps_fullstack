@@ -13,13 +13,13 @@ class Database
 
     public function __construct(array $config)
     {
-        // Data Source Name
+        // data Source Name
         $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['dbname']}";
 
-        // Options for the PDO connection
+        // options for the PDO connection
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ];
 
         try {
