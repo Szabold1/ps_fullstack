@@ -8,9 +8,9 @@ class UserFileModel
 {
     private $filePath;
 
-    public function __construct()
+    public function __construct(string $filePath)
     {
-        $this->filePath = Helper::basePath('data/users.json');
+        $this->filePath = $filePath;
 
         // create directory if it doesn't exist
         $directory = dirname($this->filePath);

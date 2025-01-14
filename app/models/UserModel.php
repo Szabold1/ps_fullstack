@@ -11,11 +11,10 @@ class UserModel
     private $db;
     private $userFileModel;
 
-    public function __construct()
+    public function __construct(Database $db, UserFileModel $userFileModel)
     {
-        $config = require Helper::basePath('app/config/db.php');
-        $this->db = new Database($config);
-        $this->userFileModel = new UserFileModel();
+        $this->db = $db;
+        $this->userFileModel = $userFileModel;
     }
 
     // Get user data from database or file, based on 'type' and 'value'

@@ -7,9 +7,17 @@ use Framework\Response;
 use Framework\Session;
 use Models\UserModel;
 use Framework\Helper;
+use Framework\Database;
+use Models\UserFileModel;
 
 class UserController
 {
+    private $userModel;
+
+    public function __construct(Database $db, UserFileModel $userFileModel)
+    {
+        $this->userModel = new UserModel($db, $userFileModel);
+    }
 
     public function index()
     {
@@ -65,8 +73,7 @@ class UserController
             "birthdate" => $birthdate,
             "password_hash" => password_hash($password, PASSWORD_DEFAULT)
         ];
-        $userModel = new UserModel();
-        $userModel->createUser($data);
+        $this->userModel->createUser($data);
 
         Helper::loadView('register', [
             'successMsg' => "A regisztráció sikeres volt!"
@@ -111,8 +118,7 @@ class UserController
             "email" => $email,
             "password" => $password
         ];
-        $userModel = new UserModel();
-        $user = $userModel->loginUser($data);
+        $user = $this->userModel->loginUser($data);
 
         Session::set('user', [
             'id' => $user['id'],
@@ -124,8 +130,7 @@ class UserController
 
     public function pageProfile()
     {
-        $userModel = new UserModel();
-        $user = $userModel->getUserByType('id', Session::get('user')['id']);
+        $user = $this->userModel->getUserByType('id', Session::get('user')['id']);
 
         Helper::loadView('profile', ['user' => $user]);
     }
@@ -144,8 +149,7 @@ class UserController
 
     public function pageEditProfile()
     {
-        $userModel = new UserModel();
-        $user = $userModel->getUserByType('id', Session::get('user')['id']);
+        $user = $this->userModel->getUserByType('id', Session::get('user')['id']);
 
         Helper::loadView('profile-edit', [
             'user' => [
@@ -188,7 +192,6 @@ class UserController
         }
 
         // update the user
-        $userModel = new UserModel();
         $data = [
             "id" => Session::get('user')['id'],
             "nickname" => $nickname,
@@ -197,7 +200,7 @@ class UserController
         if ($password) {
             $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
         }
-        $userModel->updateUser($data);
+        $this->userModel->updateUser($data);
 
         // update the session
         Session::set('user', [
