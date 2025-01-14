@@ -6,6 +6,7 @@ use Controllers\UserController;
 use Framework\Response;
 use Framework\Helper;
 use Framework\Database;
+use Framework\ServiceProvider;
 use Models\UserFileModel;
 
 class Router
@@ -79,26 +80,18 @@ class Router
             // check if the user is authorized to access the route
             $auth = $route["auth"];
             $isLoggedIn = Session::get('user');
-            if ($auth === 'guest' && $isLoggedIn) {
-                Helper::redirect('/profile');
-            }
-            if ($auth === 'user' && !$isLoggedIn) {
-                Helper::redirect('/');
+            if (($auth === 'guest' && $isLoggedIn) || ($auth === 'user' && !$isLoggedIn)) {
+                Helper::redirect($auth === 'guest' ? '/profile' : '/');
             }
 
             $controllerClass = $route["controller"];
             $controllerMethod = $route["method"];
 
             // instantiate the controller and call the method
-            if ($controllerClass === UserController::class) {
-                $config = require Helper::basePath('app/config/db.php');
-                $db = new Database($config);
-                $userFileModel = new UserFileModel(Helper::basePath('data/users.json'));
-                $controller = new UserController($db, $userFileModel);
-                if (method_exists($controller, $controllerMethod)) {
-                    $controller->$controllerMethod();
-                    exit;
-                }
+            $controller = ServiceProvider::getUserController();
+            if ($controller instanceof $controllerClass && method_exists($controller, $controllerMethod)) {
+                $controller->$controllerMethod();
+                exit;
             }
 
             // if the controller method does not exist, return an error
