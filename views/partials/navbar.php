@@ -1,6 +1,6 @@
 <header class="my-4 mx-auto flex flex-wrap items-center justify-center">
     <nav class="flex items-center justify-center bg-slate-200 py-1.5 px-1.5 rounded-xl max-w-max font-semibold">
-        <?php if (isset($_SESSION['user']) === false): ?>
+        <?php if (!Framework\Session::get('user')): ?>
             <?php loadPartial('navLink', ['href' => '/', 'text' => 'Kezdőlap']); ?>
             <?php loadPartial('navLink', ['href' => '/register', 'text' => 'Regisztráció']); ?>
             <?php loadPartial('navLink', ['href' => '/login', 'text' => 'Bejelentkezés']); ?>

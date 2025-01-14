@@ -77,4 +77,23 @@ class UserModel
         // store user data in a file
         $this->storeUserInFile($data);
     }
+
+    public function login(array $data)
+    {
+        // check for email and password
+        $user = $this->getUserByEmail($data['email']);
+
+        if (!$user || !password_verify($data['password'], $user->password_hash)) {
+            http_response_code(Response::$UNAUTHORIZED);
+            loadView('login', [
+                'errors' => ['general' => 'Helytelen email cím vagy jelszó'],
+                'user' => [
+                    'email' => $data['email']
+                ]
+            ]);
+            exit;
+        }
+
+        return $user;
+    }
 }

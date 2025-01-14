@@ -6,6 +6,6 @@ require __DIR__ . '/utils.php';
 use Framework\Session;
 use Framework\Router;
 
-// Session::start();
+Session::start();
 
 Router::route();

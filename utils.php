@@ -41,3 +41,9 @@ function loadView($name, $data = [])
         echo "View not found: {$name}";
     }
 }
+
+function redirect(string $path)
+{
+    header("Location: {$path}");
+    exit;
+}
