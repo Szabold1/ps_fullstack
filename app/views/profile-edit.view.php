@@ -1,11 +1,14 @@
 <?php
+
+use Framework\Helper;
+
 $errors ??= [];
 $user ??= [];
 $successMsg ??= '';
 ?>
 
-<?php loadPartial('top'); ?>
-<?php loadPartial('navbar'); ?>
+<?php Helper::loadPartial('top'); ?>
+<?php Helper::loadPartial('navbar'); ?>
 
 <main class="px-3 py-6 mx-auto flex flex-col items-center justify-center">
     <?php if ($successMsg) : ?>
@@ -19,7 +22,7 @@ $successMsg ??= '';
     <form class="flex flex-col items-center gap-4 max-w-72 w-full" action="/profile/edit" method="post">
         <input type="hidden" name="_method" value="PUT">
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Becenév',
             'name' => 'nickname',
             'value' => $user['nickname'] ?? '',
@@ -29,7 +32,7 @@ $successMsg ??= '';
             'error' => $errors['nickname'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Születési dátum',
             'name' => 'birthdate',
             'value' => $user['birthdate'] ?? '',
@@ -38,7 +41,7 @@ $successMsg ??= '';
             'error' => $errors['birthdate'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Új jelszó',
             'name' => 'password',
             'value' => $user['password'] ?? '',
@@ -47,9 +50,9 @@ $successMsg ??= '';
         ]); ?>
 
         <div class="w-full mt-4">
-            <?php loadPartial('formBtn', ['text' => 'Mentés']); ?>
+            <?php Helper::loadPartial('formBtn', ['text' => 'Mentés']); ?>
         </div>
     </form>
 </main>
 
-<?php loadPartial('bottom'); ?>
+<?php Helper::loadPartial('bottom'); ?>

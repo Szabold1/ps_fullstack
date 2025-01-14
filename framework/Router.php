@@ -4,6 +4,7 @@ namespace Framework;
 
 use Controllers\UserController;
 use Framework\Response;
+use Framework\Helper;
 
 class Router
 {
@@ -77,10 +78,10 @@ class Router
             $auth = $route["auth"];
             $isLoggedIn = Session::get('user');
             if ($auth === 'guest' && $isLoggedIn) {
-                redirect('/profile');
+                Helper::redirect('/profile');
             }
             if ($auth === 'user' && !$isLoggedIn) {
-                redirect('/');
+                Helper::redirect('/');
             }
 
             // call the controller method if it exists
@@ -93,13 +94,13 @@ class Router
 
             // if the controller method does not exist, return an error
             http_response_code(Response::$INTERNAL_SERVER_ERROR);
-            loadView('error', ['message' => 'Belső kiszolgálóhiba']);
+            Helper::loadView('error', ['message' => 'Belső kiszolgálóhiba']);
             exit;
         }
 
         // if the route is not found, return an error
         http_response_code(Response::$NOT_FOUND);
-        loadView('error', ['message' => 'A keresett oldal nem található']);
+        Helper::loadView('error', ['message' => 'A keresett oldal nem található']);
         exit;
     }
 }

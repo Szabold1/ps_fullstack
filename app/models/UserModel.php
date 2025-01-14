@@ -4,6 +4,7 @@ namespace Models;
 
 use Framework\Database;
 use Framework\Response;
+use Framework\Helper;
 
 class UserModel
 {
@@ -12,7 +13,7 @@ class UserModel
 
     public function __construct()
     {
-        $config = require basePath('config/db.php');
+        $config = require Helper::basePath('app/config/db.php');
         $this->db = new Database($config);
         $this->userFileModel = new UserFileModel();
     }
@@ -34,7 +35,7 @@ class UserModel
         $user = $this->getUserByType('email', $data['email']);
         if ($user) {
             http_response_code(Response::$CONFLICT);
-            loadView('register', [
+            Helper::loadView('register', [
                 'errors' => ['email' => 'Az email cím már foglalt'],
                 'user' => [
                     'email' => $data['email'],
@@ -62,7 +63,7 @@ class UserModel
 
         if (!$user || !password_verify($data['password'], $user['password_hash'])) {
             http_response_code(Response::$UNAUTHORIZED);
-            loadView('login', [
+            Helper::loadView('login', [
                 'errors' => ['general' => 'Helytelen email cím vagy jelszó'],
                 'user' => [
                     'email' => $data['email']
@@ -80,7 +81,7 @@ class UserModel
         $user = $this->getUserByType('id', $data['id']);
         if (!$user) {
             http_response_code(Response::$UNAUTHORIZED);
-            loadView('profile', [
+            Helper::loadView('profile', [
                 'errors' => ['general' => 'Nem létezik ilyen felhasználó'],
             ]);
             exit;

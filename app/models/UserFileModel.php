@@ -2,13 +2,15 @@
 
 namespace Models;
 
+use Framework\Helper;
+
 class UserFileModel
 {
     private $filePath;
 
     public function __construct()
     {
-        $this->filePath = basePath('data/users.json');
+        $this->filePath = Helper::basePath('data/users.json');
 
         // create directory if it doesn't exist
         $directory = dirname($this->filePath);

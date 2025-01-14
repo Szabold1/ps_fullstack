@@ -1,10 +1,13 @@
 <?php
+
+use Framework\Helper;
+
 $errors ??= [];
 $user ??= [];
 ?>
 
-<?php loadPartial('top'); ?>
-<?php loadPartial('navbar'); ?>
+<?php Helper::loadPartial('top'); ?>
+<?php Helper::loadPartial('navbar'); ?>
 
 <main class="px-3 py-6 mx-auto flex flex-col items-center justify-center">
     <?php if (isset($errors['general'])) : ?>
@@ -16,7 +19,7 @@ $user ??= [];
     <h2 class="mt-4 mb-8 text-center text-2xl/9 font-bold">Bejelentkezés</h2>
 
     <form class="flex flex-col items-center gap-4 max-w-72 w-full" action="/login" method="post">
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Email',
             'name' => 'email',
             'value' => $user['email'] ?? '',
@@ -26,7 +29,7 @@ $user ??= [];
             'error' => $errors['email'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Jelszó',
             'name' => 'password',
             'type' => 'password',
@@ -35,9 +38,9 @@ $user ??= [];
         ]); ?>
 
         <div class="w-full mt-4">
-            <?php loadPartial('formBtn', ['text' => 'Bejelentkezés']); ?>
+            <?php Helper::loadPartial('formBtn', ['text' => 'Bejelentkezés']); ?>
         </div>
     </form>
 </main>
 
-<?php loadPartial('bottom'); ?>
+<?php Helper::loadPartial('bottom'); ?>

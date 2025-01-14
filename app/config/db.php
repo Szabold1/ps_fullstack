@@ -1,5 +1,5 @@
 <?php
-$dotenv = Dotenv\Dotenv::createImmutable(basePath());
+$dotenv = Dotenv\Dotenv::createImmutable(\Framework\Helper::basePath());
 $dotenv->load();
 
 return [

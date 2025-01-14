@@ -6,18 +6,19 @@ use Framework\Validate;
 use Framework\Response;
 use Framework\Session;
 use Models\UserModel;
+use Framework\Helper;
 
 class UserController
 {
 
     public function index()
     {
-        loadView('home');
+        Helper::loadView('home');
     }
 
     public function pageRegister()
     {
-        loadView('register');
+        Helper::loadView('register');
     }
 
     public function register()
@@ -46,7 +47,7 @@ class UserController
         // if there are errors, show the register page with the errors
         if ($errors) {
             http_response_code(Response::$BAD_REQUEST);
-            loadView('register', [
+            Helper::loadView('register', [
                 'errors' => $errors,
                 'user' => [
                     "email" => $email,
@@ -67,7 +68,7 @@ class UserController
         $userModel = new UserModel();
         $userModel->createUser($data);
 
-        loadView('register', [
+        Helper::loadView('register', [
             'successMsg' => "A regisztráció sikeres volt!"
         ]);
         exit;
@@ -75,7 +76,7 @@ class UserController
 
     public function pageLogin()
     {
-        loadView('login');
+        Helper::loadView('login');
     }
 
     public function login()
@@ -96,7 +97,7 @@ class UserController
         // if there are errors, show the login page with the errors
         if ($errors) {
             http_response_code(Response::$BAD_REQUEST);
-            loadView('login', [
+            Helper::loadView('login', [
                 'errors' => $errors,
                 'user' => [
                     "email" => $email,
@@ -118,7 +119,7 @@ class UserController
             'nickname' => $user['nickname'],
         ]);
 
-        redirect('/profile');
+        Helper::redirect('/profile');
     }
 
     public function pageProfile()
@@ -126,7 +127,7 @@ class UserController
         $userModel = new UserModel();
         $user = $userModel->getUserByType('id', Session::get('user')['id']);
 
-        loadView('profile', ['user' => $user]);
+        Helper::loadView('profile', ['user' => $user]);
     }
 
     public function logout()
@@ -138,7 +139,7 @@ class UserController
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
 
-        redirect('/login');
+        Helper::redirect('/login');
     }
 
     public function pageEditProfile()
@@ -146,7 +147,7 @@ class UserController
         $userModel = new UserModel();
         $user = $userModel->getUserByType('id', Session::get('user')['id']);
 
-        loadView('profile-edit', [
+        Helper::loadView('profile-edit', [
             'user' => [
                 'nickname' => $user['nickname'],
                 'birthdate' => $user['birthdate'],
@@ -176,7 +177,7 @@ class UserController
         // if there are errors, show the edit profile page with the errors
         if ($errors) {
             http_response_code(Response::$BAD_REQUEST);
-            loadView('profile-edit', [
+            Helper::loadView('profile-edit', [
                 'errors' => $errors,
                 'user' => [
                     "nickname" => $nickname,
@@ -204,7 +205,7 @@ class UserController
             'nickname' => $nickname,
         ]);
 
-        loadView('profile-edit', [
+        Helper::loadView('profile-edit', [
             'successMsg' => "A profil szerkesztése sikeres volt!",
             'user' => [
                 'nickname' => $nickname,

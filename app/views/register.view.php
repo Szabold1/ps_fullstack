@@ -1,11 +1,14 @@
 <?php
+
+use Framework\Helper;
+
 $errors ??= [];
 $user ??= [];
 $successMsg ??= '';
 ?>
 
-<?php loadPartial('top'); ?>
-<?php loadPartial('navbar'); ?>
+<?php Helper::loadPartial('top'); ?>
+<?php Helper::loadPartial('navbar'); ?>
 
 <main class="px-3 py-6 mx-auto flex flex-col items-center justify-center">
     <?php if ($successMsg) : ?>
@@ -17,7 +20,7 @@ $successMsg ??= '';
     <h2 class="mt-4 mb-8 text-center text-2xl/9 font-bold">Regisztráció</h2>
 
     <form class="flex flex-col items-center gap-4 max-w-72 w-full" action="/register" method="post">
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Email',
             'name' => 'email',
             'value' => $user['email'] ?? '',
@@ -27,7 +30,7 @@ $successMsg ??= '';
             'error' => $errors['email'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Becenév',
             'name' => 'nickname',
             'value' => $user['nickname'] ?? '',
@@ -37,7 +40,7 @@ $successMsg ??= '';
             'error' => $errors['nickname'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Születési dátum',
             'name' => 'birthdate',
             'value' => $user['birthdate'] ?? '',
@@ -46,7 +49,7 @@ $successMsg ??= '';
             'error' => $errors['birthdate'] ?? ''
         ]); ?>
 
-        <?php loadPartial('formInput', [
+        <?php Helper::loadPartial('formInput', [
             'label' => 'Jelszó',
             'name' => 'password',
             'type' => 'password',
@@ -55,9 +58,9 @@ $successMsg ??= '';
         ]); ?>
 
         <div class="w-full mt-4">
-            <?php loadPartial('formBtn', ['text' => 'Regisztráció']); ?>
+            <?php Helper::loadPartial('formBtn', ['text' => 'Regisztráció']); ?>
         </div>
     </form>
 </main>
 
-<?php loadPartial('bottom'); ?>
+<?php Helper::loadPartial('bottom'); ?>
