@@ -142,7 +142,7 @@ class UserController
         }
 
         Session::set('user', [
-            'id' => $user['id'],
+            'id' => (string)$user['id'],
             'nickname' => $user['nickname'],
         ]);
 
