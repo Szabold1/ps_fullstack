@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Models;
 
 use Framework\Helper;
@@ -25,7 +27,7 @@ class UserFileModel
         }
     }
 
-    private function getAllUsers()
+    private function getAllUsers(): array
     {
         if (file_exists($this->filePath)) {
             $fileContent = file_get_contents($this->filePath);
@@ -35,7 +37,7 @@ class UserFileModel
         return [];
     }
 
-    public function getUserByType(string $type, string $value)
+    public function getUserByType(string $type, string $value): array|null
     {
         $users = $this->getAllUsers();
         foreach ($users as $user) {
@@ -47,39 +49,49 @@ class UserFileModel
         return null;
     }
 
-    public function createUser(array $data)
+    public function createUser(array $data): array|null
     {
+        $user = $this->getUserByType('id', $data['id']);
+        if ($user) {
+            return null;
+        }
+
         $users = $this->getAllUsers();
 
         $users[] = $data;
         file_put_contents($this->filePath, json_encode($users));
+
+        return $data;
     }
 
-    public function updateUser(array $data)
+    public function updateUser(array $data): array|null
     {
         $user = $this->getUserByType('id', $data['id']);
-
-        if ($user) {
-            // update user data
-            $user['nickname'] = $data['nickname'];
-            $user['birthdate'] = $data['birthdate'];
-            if (isset($data['password_hash'])) {
-                $user['password_hash'] = $data['password_hash'];
-            }
-
-            // get all users from file
-            $users = $this->getAllUsers();
-
-            // update the user in the data read from the file
-            foreach ($users as $index => $existingUser) {
-                if ($existingUser['id'] === $user['id']) {
-                    $users[$index] = array_merge($existingUser, $user);
-                    break;
-                }
-            }
-
-            // write the updated data back to the file
-            file_put_contents($this->filePath, json_encode($users));
+        if (!$user) {
+            return null;
         }
+
+        // update user data
+        $user['nickname'] = $data['nickname'];
+        $user['birthdate'] = $data['birthdate'];
+        if (isset($data['password_hash'])) {
+            $user['password_hash'] = $data['password_hash'];
+        }
+
+        // get all users from file
+        $users = $this->getAllUsers();
+
+        // update the user in the data read from the file
+        foreach ($users as $index => $existingUser) {
+            if ($existingUser['id'] === $user['id']) {
+                $users[$index] = array_merge($existingUser, $user);
+                break;
+            }
+        }
+
+        // write the updated data back to the file
+        file_put_contents($this->filePath, json_encode($users));
+
+        return $user;
     }
 }

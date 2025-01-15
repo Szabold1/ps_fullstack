@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Framework;
 
 use Controllers\UserController;
@@ -13,6 +15,7 @@ class ServiceProvider
         $config = require Helper::basePath('app/config/db.php');
         $db = new Database($config);
         $userFileModel = new UserFileModel(Helper::basePath('data/users.json'));
-        return new UserController($db, $userFileModel);
+        $useDatabase = rand(0, 1) === 1;
+        return new UserController($db, $userFileModel, $useDatabase);
     }
 }

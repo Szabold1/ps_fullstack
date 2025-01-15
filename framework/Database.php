@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Framework;
 
 use Exception;
@@ -9,7 +11,7 @@ use PDOStatement;
 
 class Database
 {
-    public PDO $connection;
+    private PDO $connection;
 
     public function __construct(array $config)
     {
@@ -44,5 +46,10 @@ class Database
         } catch (PDOException $e) {
             throw new Exception("Query failed: {$e->getMessage()}");
         }
+    }
+
+    public function getLastInsertId(): string
+    {
+        return $this->connection->lastInsertId();
     }
 }

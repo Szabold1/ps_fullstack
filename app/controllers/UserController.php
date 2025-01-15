@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Controllers;
 
 use Framework\Validate;
@@ -13,10 +15,12 @@ use Models\UserFileModel;
 class UserController
 {
     private $userModel;
+    private $useDatabase;
 
-    public function __construct(Database $db, UserFileModel $userFileModel)
+    public function __construct(Database $db, UserFileModel $userFileModel, bool $useDatabse = true)
     {
-        $this->userModel = new UserModel($db, $userFileModel);
+        $this->useDatabase = $useDatabse;
+        $this->userModel = new UserModel($db, $userFileModel, $this->useDatabase);
     }
 
     public function index()
@@ -63,7 +67,6 @@ class UserController
                     "birthdate" => $birthdate,
                 ]
             ]);
-            exit;
         }
 
         // create the user
@@ -73,12 +76,22 @@ class UserController
             "birthdate" => $birthdate,
             "password_hash" => password_hash($password, PASSWORD_DEFAULT)
         ];
-        $this->userModel->createUser($data);
+        $newUser = $this->userModel->createUser($data);
+        if (!$newUser) {
+            http_response_code(Response::$CONFLICT);
+            Helper::loadView('register', [
+                'errors' => ['email' => 'Az email cím már foglalt'],
+                'user' => [
+                    'email' => $data['email'],
+                    'nickname' => $data['nickname'],
+                    'birthdate' => $data['birthdate']
+                ]
+            ]);
+        }
 
         Helper::loadView('register', [
             'successMsg' => "A regisztráció sikeres volt!"
         ]);
-        exit;
     }
 
     public function pageLogin()
@@ -110,7 +123,6 @@ class UserController
                     "email" => $email,
                 ]
             ]);
-            exit;
         }
 
         // login the user
@@ -119,6 +131,15 @@ class UserController
             "password" => $password
         ];
         $user = $this->userModel->loginUser($data);
+        if (!$user) {
+            http_response_code(Response::$UNAUTHORIZED);
+            Helper::loadView('login', [
+                'errors' => ['general' => 'Helytelen email cím vagy jelszó'],
+                'user' => [
+                    'email' => $data['email']
+                ]
+            ]);
+        }
 
         Session::set('user', [
             'id' => $user['id'],
@@ -130,7 +151,7 @@ class UserController
 
     public function pageProfile()
     {
-        $user = $this->userModel->getUserByType('id', Session::get('user')['id']);
+        $user = $this->userModel->getUserByType('id', Session::get('user')['id'], $this->useDatabase);
 
         Helper::loadView('profile', ['user' => $user]);
     }
@@ -149,7 +170,7 @@ class UserController
 
     public function pageEditProfile()
     {
-        $user = $this->userModel->getUserByType('id', Session::get('user')['id']);
+        $user = $this->userModel->getUserByType('id', Session::get('user')['id'], $this->useDatabase);
 
         Helper::loadView('profile-edit', [
             'user' => [
@@ -188,7 +209,6 @@ class UserController
                     "birthdate" => $birthdate,
                 ]
             ]);
-            exit;
         }
 
         // update the user
@@ -200,7 +220,13 @@ class UserController
         if ($password) {
             $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
         }
-        $this->userModel->updateUser($data);
+        $user = $this->userModel->updateUser($data);
+        if (!$user) {
+            http_response_code(Response::$UNAUTHORIZED);
+            Helper::loadView('profile', [
+                'errors' => ['general' => 'Nem létezik ilyen felhasználó'],
+            ]);
+        }
 
         // update the session
         Session::set('user', [
