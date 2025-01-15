@@ -1,2 +1,8 @@
 .env
 vendor
+
+# PHPUnit
+.phpunit.result.cache
+
+# data, e.g. users.json
+data
