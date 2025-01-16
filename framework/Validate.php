@@ -23,7 +23,7 @@ class Validate
     public static function birthdate(string $birthdate): bool
     {
         $date = DateTime::createFromFormat('Y-m-d', $birthdate);
-        if (!$date) {
+        if (!$date || $date->format('Y-m-d') !== $birthdate) {
             return false;
         }
 
