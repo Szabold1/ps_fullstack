@@ -4,11 +4,6 @@
 
 Ez a projekt egy egyszerű regisztrációs és bejelentkezési rendszert valósít meg native PHP-ben. Az adatok tárolása MySQL adatbázisban és fájlban történik. A felhasználók a bejelentkezés után módosíthatják profil adataikat, valamint kijelentkezhetnek.
 
-## Fejlesztési Környezet
-
-- PHP 8.4 vagy újabb
-- MySQL 8.0 vagy újabb
-
 ## Telepítési Útmutató
 
 1. **Szükséges szoftverek**: Győződj meg róla, hogy a következő szoftverek telepítve vannak:
@@ -49,4 +44,4 @@ composer install
 php -S localhost:8000
 ```
 
-6. Látogasd meg a böngészőben a http://localhost:8000/-ot. Ha a 8000-es port foglalt, válassz másik portot.
+6. Látogasd meg a böngészőben a http://localhost:8000/ -ot. Ha a 8000-es port foglalt, válassz másik portot.
