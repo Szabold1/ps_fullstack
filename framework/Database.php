@@ -31,7 +31,7 @@ class Database
         }
     }
 
-    public function query(string $sql, array $params = []): PDOStatement
+    private function query(string $sql, array $params = []): PDOStatement
     {
         try {
             $stmt = $this->connection->prepare($sql);
@@ -48,8 +48,42 @@ class Database
         }
     }
 
-    public function getLastInsertId(): string
+    public function getUserByType(string $type, string $value): array|null
     {
-        return $this->connection->lastInsertId();
+        $validTypes = ['email', 'id'];
+        if (!in_array($type, $validTypes)) {
+            throw new Exception("Invalid type: {$type}");
+        }
+
+        $result = $this->query("SELECT * FROM users WHERE {$type} = :{$type}", [$type => $value])->fetch();
+        return $result === false ? null : $result;
+    }
+
+    public function createUser(array $data): array|null
+    {
+        $this->query("INSERT INTO users (email, nickname, birthdate, password_hash) VALUES (:email, :nickname, :birthdate, :password_hash)", $data);
+
+        // add the id of the user to data
+        $data['id'] = $this->connection->lastInsertId();
+
+        return $data['id'] ? $data : null;
+    }
+
+    public function updateUser(array $data): array|null
+    {
+        // filter out null values
+        $validData = array_filter($data, function ($value) {
+            return $value !== null;
+        });
+
+        $fieldsToUpdate = [];
+        foreach ($validData as $key => $value) {
+            $fieldsToUpdate[] = "{$key} = :{$key}";
+        }
+        $fieldsToUpdate = implode(', ', $fieldsToUpdate);
+
+        $this->query("UPDATE users SET {$fieldsToUpdate} WHERE id = :id", $validData);
+
+        return $this->getUserByType('id', $validData['id']);
     }
 }

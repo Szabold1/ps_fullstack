@@ -26,8 +26,7 @@ class UserModel
     public function getUserByType(string $type, string $value, bool $useDatabase = true): array|null
     {
         if ($useDatabase) {
-            $result = $this->db->query("SELECT * FROM users WHERE $type = :$type", [$type => $value])->fetch();
-            return $result === false ? null : $result;
+            return $this->db->getUserByType($type, $value);
         } else {
             return $this->userFileModel->getUserByType($type, $value);
         }
@@ -42,15 +41,15 @@ class UserModel
         }
 
         // insert user data into database
-        $this->db->query("INSERT INTO users (email, nickname, birthdate, password_hash) VALUES (:email, :nickname, :birthdate, :password_hash)", $data);
-
-        // add the id of the user to data
-        $data['id'] = $this->db->getLastInsertId();
+        $createdUser = $this->db->createUser($data);
+        if (!$createdUser) {
+            return null;
+        }
 
         // store user data in a file
-        $this->userFileModel->createUser($data);
+        $this->userFileModel->createUser($createdUser);
 
-        return $data;
+        return $createdUser;
     }
 
     public function loginUser(array $data): array|null
@@ -74,13 +73,19 @@ class UserModel
         }
 
         // update user data in database and file
-        $dataToUpdate = "nickname = :nickname, birthdate = :birthdate";
-        if (isset($data['password_hash'])) {
-            $dataToUpdate .= ", password_hash = :password_hash";
-        }
-        $this->db->query("UPDATE users SET {$dataToUpdate} WHERE id = :id", $data);
-        $this->userFileModel->updateUser($data);
+        $dataToUpdate = [
+            'id' => $data['id'],
+            'nickname' => $data['nickname'],
+            'birthdate' => $data['birthdate'],
+            'password_hash' => $data['password_hash'] ?? null,
+        ];
+        $updatedUser = $this->db->updateUser($dataToUpdate);
+        $updatedUserFile = $this->userFileModel->updateUser($dataToUpdate);
 
-        return $data;
+        if (!$updatedUser || !$updatedUserFile) {
+            return null;
+        }
+
+        return $updatedUser;
     }
 }
