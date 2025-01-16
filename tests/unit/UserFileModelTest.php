@@ -48,6 +48,8 @@ class UserFileModelTest extends TestCase
     // ------------------------------ //
     //      Test the constructor      //
     // ------------------------------ //
+
+    // Test the case where the file and directory are created by the constructor
     public function testConstructorCreatesFileAndDirectory()
     {
         $this->assertFileExists($this->testFilePath);
@@ -57,6 +59,8 @@ class UserFileModelTest extends TestCase
     // ------------------------------------ //
     //      Test the createUser method      //
     // ------------------------------------ //
+
+    // Test the case where the user is successfully created and stored in the file
     public function testCreateUserSuccess()
     {
         // Call the method
@@ -69,7 +73,8 @@ class UserFileModelTest extends TestCase
         $this->assertEquals($this->testUserData, $users[0]);
     }
 
-    public function testCreateUserFailure()
+    // Test the case where the user is not created because the email already exists
+    public function testCreateUserDuplicateEmail()
     {
         // Call the method
         $this->userFileModel->createUser($this->testUserData);
@@ -83,7 +88,7 @@ class UserFileModelTest extends TestCase
         $this->assertNull($result2);
     }
 
-
+    // Test the case where multiple users are successfully created and stored in the file
     public function testCreateUserMultipleSuccess()
     {
         $data2 = [
@@ -109,6 +114,8 @@ class UserFileModelTest extends TestCase
     // --------------------------------------- //
     //      Test the getUserByType method      //
     // --------------------------------------- //
+
+    // Test the case where the user is successfully retrieved by email
     public function testGetUserByTypeWithTypeEmailSuccess()
     {
         // Add a user to the file
@@ -120,7 +127,8 @@ class UserFileModelTest extends TestCase
         $this->assertEquals($this->testUserData, $result);
     }
 
-    public function testGetUserByTypeWithTypeEmailFailure()
+    // Test the case where the user is not retrieved by email because it does not exist
+    public function testGetUserByTypeWithTypeEmailNotExisting()
     {
         $result = $this->userFileModel->getUserByType('email', 'test@example.com');
 
@@ -128,6 +136,7 @@ class UserFileModelTest extends TestCase
         $this->assertNull($result);
     }
 
+    // Test the case where the user is successfully retrieved by id
     public function testGetUserByTypeWithTypeIdSuccess()
     {
         // Add a user to the file
@@ -139,7 +148,8 @@ class UserFileModelTest extends TestCase
         $this->assertEquals($this->testUserData, $result);
     }
 
-    public function testGetUserByTypeWithTypeIdFailure()
+    // Test the case where the user is not retrieved by id because it does not exist
+    public function testGetUserByTypeWithTypeIdNotExisting()
     {
         $result = $this->userFileModel->getUserByType('id', '1');
 
@@ -150,6 +160,8 @@ class UserFileModelTest extends TestCase
     // ------------------------------------ //
     //      Test the updateUser method      //
     // ------------------------------------ //
+
+    // Test the case where the user is successfully updated
     public function testUpdateUserSuccess()
     {
         // Add a user to the file
@@ -169,7 +181,8 @@ class UserFileModelTest extends TestCase
         $this->assertEquals($data, $result);
     }
 
-    public function testUpdateUserFailure()
+    // Test the case where the user is not updated because it does not exist
+    public function testUpdateUserNotExisting()
     {
         $result = $this->userFileModel->updateUser($this->testUserData);
 

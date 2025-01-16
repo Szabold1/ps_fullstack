@@ -64,6 +64,7 @@ class UserFileModel
         return $data;
     }
 
+    // Update user in the file, return the updated user or null if user not found
     public function updateUser(array $data): array|null
     {
         $user = $this->getUserByType('id', $data['id']);
@@ -72,11 +73,10 @@ class UserFileModel
         }
 
         // update user data
-        $user['nickname'] = $data['nickname'];
-        $user['birthdate'] = $data['birthdate'];
-        if (isset($data['password_hash'])) {
-            $user['password_hash'] = $data['password_hash'];
-        }
+        $validData = array_filter($data, function ($value) {
+            return $value !== null;
+        });
+        $user = array_merge($user, $validData);
 
         // get all users from file
         $users = $this->getAllUsers();
