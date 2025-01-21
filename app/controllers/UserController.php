@@ -216,10 +216,8 @@ class UserController
             "id" => Session::get('user')['id'],
             "nickname" => $nickname,
             "birthdate" => $birthdate,
+            "password_hash" => password_hash($password, PASSWORD_DEFAULT) ?? null,
         ];
-        if ($password) {
-            $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
-        }
         $user = $this->userModel->updateUser($data);
         if (!$user) {
             http_response_code(Response::$UNAUTHORIZED);

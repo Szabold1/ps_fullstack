@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Models;
 
 use Framework\Database;
-use Framework\Response;
-use Framework\Helper;
 
 class UserModel
 {
@@ -21,8 +19,7 @@ class UserModel
         $this->useDatabase = $useDatabase;
     }
 
-    // Get user data from database or file, based on 'type' and 'value'
-    // e.g. get('email', 'asdf@example.com')
+    // Get user data from database or file, based on 'type', 'value' and 'useDatabase' parameters
     public function getUserByType(string $type, string $value, bool $useDatabase = true): array|null
     {
         if ($useDatabase) {
