@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace Controllers;
 
-use Framework\Validate;
 use Framework\Response;
 use Framework\Session;
 use Models\UserModel;
 use Framework\Helper;
 use Framework\Database;
 use Models\UserFileModel;
+use Framework\Form;
 
 class UserController
 {
     private $userModel;
     private $useDatabase;
+    private $form;
 
     public function __construct(Database $db, UserFileModel $userFileModel, bool $useDatabse = true)
     {
         $this->useDatabase = $useDatabse;
         $this->userModel = new UserModel($db, $userFileModel, $this->useDatabase);
+        $this->form = new Form();
     }
 
     public function index()
@@ -41,23 +43,15 @@ class UserController
         $birthdate = $_POST['birthdate'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        $errors = [];
-        // validate the data
-        if (!Validate::email($email)) {
-            $errors['email'] = "Az email cím formátuma nem megfelelő";
-        }
-        if (!Validate::nickname($nickname)) {
-            $errors['nickname'] = "A becenévnek tartalmaznia kell legalább 2 karaktert, valamint csak betűket és számokat tartalmazhat";
-        }
-        if (!Validate::birthdate($birthdate)) {
-            $errors['birthdate'] = "A kor nem lehet kevesebb mint 10, vagy több mint 100";
-        }
-        if (!Validate::password($password)) {
-            $errors['password'] = "A jelszónak tartalmaznia kell legalább egy kisbetűt, egy nagybetűt és egy számot, valamint legalább 6 karakter hosszúnak kell lennie";
-        }
-
-        // if there are errors, show the register page with the errors
-        if ($errors) {
+        // if validation fails...
+        if (!$this->form->validateRegistration([
+            'email' => $email,
+            'nickname' => $nickname,
+            'birthdate' => $birthdate,
+            'password' => $password
+        ])) {
+            // get the errors and show the register page with the errors
+            $errors = $this->form->getErrors();
             http_response_code(Response::$BAD_REQUEST);
             Helper::loadView('register', [
                 'errors' => $errors,
@@ -70,21 +64,20 @@ class UserController
         }
 
         // create the user
-        $data = [
+        $newUser = $this->userModel->createUser([
             "email" => $email,
             "nickname" => $nickname,
             "birthdate" => $birthdate,
             "password_hash" => password_hash($password, PASSWORD_DEFAULT)
-        ];
-        $newUser = $this->userModel->createUser($data);
+        ]);
         if (!$newUser) {
             http_response_code(Response::$CONFLICT);
             Helper::loadView('register', [
                 'errors' => ['email' => 'Az email cím már foglalt'],
                 'user' => [
-                    'email' => $data['email'],
-                    'nickname' => $data['nickname'],
-                    'birthdate' => $data['birthdate']
+                    'email' => $email,
+                    'nickname' => $nickname,
+                    'birthdate' => $birthdate
                 ]
             ]);
         }
@@ -105,17 +98,13 @@ class UserController
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        $errors = [];
-        // validate the data
-        if (!Validate::email($email)) {
-            $errors['email'] = "Az email cím formátuma nem megfelelő";
-        }
-        if (!Validate::password($password)) {
-            $errors['password'] = "A jelszónak tartalmaznia kell legalább egy kisbetűt, egy nagybetűt és egy számot, valamint legalább 6 karakter hosszúnak kell lennie";
-        }
-
-        // if there are errors, show the login page with the errors
-        if ($errors) {
+        // if validation fails...
+        if (!$this->form->validateLogin([
+            'email' => $email,
+            'password' => $password
+        ])) {
+            // get the errors and show the login page with the errors
+            $errors = $this->form->getErrors();
             http_response_code(Response::$BAD_REQUEST);
             Helper::loadView('login', [
                 'errors' => $errors,
@@ -187,20 +176,14 @@ class UserController
         $birthdate = $_POST['birthdate'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        $errors = [];
-        // validate the data
-        if (!Validate::nickname($nickname)) {
-            $errors['nickname'] = "A becenévnek tartalmaznia kell legalább 2 karaktert, valamint csak betűket és számokat tartalmazhat";
-        }
-        if (!Validate::birthdate($birthdate)) {
-            $errors['birthdate'] = "A kor nem lehet kevesebb mint 10, vagy több mint 100";
-        }
-        if ($password && !Validate::password($password)) {
-            $errors['password'] = "A jelszónak tartalmaznia kell legalább egy kisbetűt, egy nagybetűt és egy számot, valamint legalább 6 karakter hosszúnak kell lennie";
-        }
-
-        // if there are errors, show the edit profile page with the errors
-        if ($errors) {
+        // if validation fails...
+        if (!$this->form->validateEditProfile([
+            'nickname' => $nickname,
+            'birthdate' => $birthdate,
+            'password' => $password
+        ])) {
+            // get the errors and show the edit profile page with the errors
+            $errors = $this->form->getErrors();
             http_response_code(Response::$BAD_REQUEST);
             Helper::loadView('profile-edit', [
                 'errors' => $errors,
