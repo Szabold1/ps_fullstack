@@ -1,8 +1,11 @@
 <?php
 
 use Framework\Helper;
+use Framework\Session;
 
-$nickname = $user['nickname'] ?? '';
+$nickname = Session::getFlash(Session::USER)['nickname'] ?? '';
+
+Session::unsetFlashAll();
 ?>
 
 <?php Helper::loadPartial('top'); ?>

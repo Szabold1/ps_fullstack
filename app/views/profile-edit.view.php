@@ -1,19 +1,22 @@
 <?php
 
 use Framework\Helper;
+use Framework\Session;
 
-$errors ??= [];
-$user ??= [];
-$successMsg ??= '';
+$errors = Session::getFlash(Session::ERRORS) ?? [];
+$user = Session::getFlash(Session::USER) ?? [];
+$success = Session::getFlash(Session::SUCCESS) ?? false;
+
+Session::unsetFlashAll();
 ?>
 
 <?php Helper::loadPartial('top'); ?>
 <?php Helper::loadPartial('navbar'); ?>
 
 <main class="px-3 py-6 mx-auto flex flex-col items-center justify-center">
-    <?php if ($successMsg) : ?>
+    <?php if ($success) : ?>
         <div class="text-green-800 bg-green-100 rounded-md px-2.5 py-1 mb-3">
-            <?= $successMsg ?>
+            <?= $success ?>
         </div>
     <?php endif; ?>
 

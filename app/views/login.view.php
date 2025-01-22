@@ -1,9 +1,12 @@
 <?php
 
 use Framework\Helper;
+use Framework\Session;
 
-$errors ??= [];
-$user ??= [];
+$errors = Session::getFlash(Session::ERRORS) ?? [];
+$user = Session::getFlash(Session::USER) ?? [];
+
+Session::unsetFlashAll();
 ?>
 
 <?php Helper::loadPartial('top'); ?>

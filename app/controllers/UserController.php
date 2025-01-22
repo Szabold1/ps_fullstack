@@ -50,17 +50,15 @@ class UserController
             'birthdate' => $birthdate,
             'password' => $password
         ])) {
-            // get the errors and show the register page with the errors
-            $errors = $this->form->getErrors();
-            http_response_code(Response::$BAD_REQUEST);
-            Helper::loadView('register', [
-                'errors' => $errors,
-                'user' => [
-                    "email" => $email,
-                    "nickname" => $nickname,
-                    "birthdate" => $birthdate,
-                ]
+            Session::setFlash(Session::ERRORS, $this->form->getErrors());
+            Session::setFlash(Session::USER, [
+                'email' => $email,
+                'nickname' => $nickname,
+                'birthdate' => $birthdate,
             ]);
+
+            http_response_code(Response::$BAD_REQUEST);
+            Helper::redirect('/register');
         }
 
         // create the user
@@ -71,20 +69,19 @@ class UserController
             "password_hash" => password_hash($password, PASSWORD_DEFAULT)
         ]);
         if (!$newUser) {
-            http_response_code(Response::$CONFLICT);
-            Helper::loadView('register', [
-                'errors' => ['email' => 'Az email cím már foglalt'],
-                'user' => [
-                    'email' => $email,
-                    'nickname' => $nickname,
-                    'birthdate' => $birthdate
-                ]
+            Session::setFlash('errors', ['email' => 'Ez az email cím már foglalt']);
+            Session::setFlash(Session::USER, [
+                'email' => $email,
+                'nickname' => $nickname,
+                'birthdate' => $birthdate,
             ]);
+
+            http_response_code(Response::$CONFLICT);
+            Helper::redirect('/register');
         }
 
-        Helper::loadView('register', [
-            'successMsg' => "A regisztráció sikeres volt!"
-        ]);
+        Session::setFlash('success', 'A regisztráció sikeres volt!');
+        Helper::redirect('/register');
     }
 
     public function pageLogin()
@@ -103,34 +100,25 @@ class UserController
             'email' => $email,
             'password' => $password
         ])) {
-            // get the errors and show the login page with the errors
-            $errors = $this->form->getErrors();
+            Session::setFlash(Session::ERRORS, $this->form->getErrors());
+            Session::setFlash(Session::USER, ['email' => $email]);
             http_response_code(Response::$BAD_REQUEST);
-            Helper::loadView('login', [
-                'errors' => $errors,
-                'user' => [
-                    "email" => $email,
-                ]
-            ]);
+            Helper::redirect('/login');
         }
 
         // login the user
-        $data = [
+        $user = $this->userModel->loginUser([
             "email" => $email,
             "password" => $password
-        ];
-        $user = $this->userModel->loginUser($data);
+        ]);
         if (!$user) {
+            Session::setFlash(Session::ERRORS, ['general' => 'Helytelen email cím vagy jelszó']);
+            Session::setFlash(Session::USER, ['email' => $email]);
             http_response_code(Response::$UNAUTHORIZED);
-            Helper::loadView('login', [
-                'errors' => ['general' => 'Helytelen email cím vagy jelszó'],
-                'user' => [
-                    'email' => $data['email']
-                ]
-            ]);
+            Helper::redirect('/login');
         }
 
-        Session::set('user', [
+        Session::set(Session::USER, [
             'id' => (string)$user['id'],
             'nickname' => $user['nickname'],
         ]);
@@ -140,9 +128,10 @@ class UserController
 
     public function pageProfile()
     {
-        $user = $this->userModel->getUserByType('id', Session::get('user')['id'], $this->useDatabase);
+        $user = $this->userModel->getUserByType('id', Session::get(Session::USER)['id'], $this->useDatabase);
 
-        Helper::loadView('profile', ['user' => $user]);
+        Session::setFlash(Session::USER, ['nickname' => $user['nickname']]);
+        Helper::loadView('profile');
     }
 
     public function logout()
@@ -159,14 +148,13 @@ class UserController
 
     public function pageEditProfile()
     {
-        $user = $this->userModel->getUserByType('id', Session::get('user')['id'], $this->useDatabase);
+        $user = $this->userModel->getUserByType('id', Session::get(Session::USER)['id'], $this->useDatabase);
 
-        Helper::loadView('profile-edit', [
-            'user' => [
-                'nickname' => $user['nickname'],
-                'birthdate' => $user['birthdate'],
-            ]
+        Session::setFlash(Session::USER, [
+            'nickname' => $user['nickname'],
+            'birthdate' => $user['birthdate'],
         ]);
+        Helper::loadView('profile-edit');
     }
 
     public function editProfile()
@@ -174,7 +162,7 @@ class UserController
         // get the data from the request
         $nickname = $_POST['nickname'] ?? '';
         $birthdate = $_POST['birthdate'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $password = $_POST['password'] ?? null;
 
         // if validation fails...
         if (!$this->form->validateEditProfile([
@@ -182,45 +170,40 @@ class UserController
             'birthdate' => $birthdate,
             'password' => $password
         ])) {
-            // get the errors and show the edit profile page with the errors
-            $errors = $this->form->getErrors();
-            http_response_code(Response::$BAD_REQUEST);
-            Helper::loadView('profile-edit', [
-                'errors' => $errors,
-                'user' => [
-                    "nickname" => $nickname,
-                    "birthdate" => $birthdate,
-                ]
+            Session::setFlash(Session::ERRORS, $this->form->getErrors());
+            Session::setFlash(Session::USER, [
+                'nickname' => $nickname,
+                'birthdate' => $birthdate,
             ]);
+            http_response_code(Response::$BAD_REQUEST);
+            Helper::redirect('/profile/edit');
         }
 
         // update the user
-        $data = [
-            "id" => Session::get('user')['id'],
+        $hashedPassword = $password ? password_hash($password, PASSWORD_DEFAULT) : null;
+        $user = $this->userModel->updateUser([
+            "id" => Session::get(Session::USER)['id'],
             "nickname" => $nickname,
             "birthdate" => $birthdate,
-            "password_hash" => password_hash($password, PASSWORD_DEFAULT) ?? null,
-        ];
-        $user = $this->userModel->updateUser($data);
+            "password_hash" => $hashedPassword
+        ]);
         if (!$user) {
+            Session::setFlash(Session::ERRORS, ['general' => 'Nem létezik ilyen felhasználó']);
             http_response_code(Response::$UNAUTHORIZED);
-            Helper::loadView('profile', [
-                'errors' => ['general' => 'Nem létezik ilyen felhasználó'],
-            ]);
+            Helper::redirect('/profile/edit');
         }
 
         // update the session
-        Session::set('user', [
-            'id' => Session::get('user')['id'],
+        Session::set(Session::USER, [
+            'id' => Session::get(Session::USER)['id'],
             'nickname' => $nickname,
         ]);
 
-        Helper::loadView('profile-edit', [
-            'successMsg' => "A profil szerkesztése sikeres volt!",
-            'user' => [
-                'nickname' => $nickname,
-                'birthdate' => $birthdate,
-            ]
+        Session::setFlash(Session::SUCCESS, 'A profil szerkesztése sikeres volt!');
+        Session::setFlash(Session::USER, [
+            'nickname' => $nickname,
+            'birthdate' => $birthdate,
         ]);
+        Helper::redirect('/profile/edit');
     }
 }
